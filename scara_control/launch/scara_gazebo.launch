@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+
+    <!-- We resume the logic in empty_world.launch -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="debug" value="$(arg debug)" />
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="headless" value="$(arg headless)"/>
+    </include>
+
+    <param 
+        name="robot_description" 
+        textfile="$(find scara_control)/urdf/scara_control.urdf" />
+    
+    <node 
+        name="urdf_spawner" 
+        pkg="gazebo_ros" 
+        type="spawn_model" 
+        respawn="false" 
+        output="screen"
+	    args="-urdf -model scara_control -param robot_description"/> 
+   
+    <rosparam 
+        file="$(find scara_control)/config/scara_controller.yaml" command="load"/>
+
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+	output="screen" ns="/scara_control" args="joint_state_controller
+					  joint1_position_controller
+					  joint2_position_controller
+					  joint3_position_controller"/>
+
+  
+    <node 
+        name="robot_state_publisher" 
+        pkg="robot_state_publisher" 
+        type="robot_state_publisher" 
+        respawn="false" 
+        output="screen">
+        <remap from="/joint_states" to="/scara_control/joint_states" />
+    </node>
+
+   
+</launch>

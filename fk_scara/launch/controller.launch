@@ -1,0 +1,7 @@
+<launch>
+    <node
+        name ="control_commander"
+        pkg ="fk_scara"
+        type ="src/control_commander"
+    />
+</launch>
